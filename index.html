@@ -62,7 +62,7 @@
   commentTextElement.addEventListener("input", disableButton);
 
 
-//массив
+  //массив
   const comments = [
     {
       name: "Глеб Фокин",
@@ -115,31 +115,33 @@
           if (element.children.length == 0) {
             commentTextElement.value = `${comments[index].text}`;//???непонятно
           }
-          
+
         }
         renderComments()
       });
     }
   }
 
+// Добавить комментарий
 
-
-  //кнопка с полем ввода добавление отзыва к комменту ДОДеЛАТЬ
-  const reviewButtonElements = () => {
-    const reviewElements = document.querySelectorAll(".comment-text");
-    reviewElements.forEach((element, index) => {
-      element.addEventListener("click", (event) => {
-        if (element.children.length == 0) {
-          commentTextElement.value = `> ${comments[index].text}
-${comments[index].name} 
-
-
-        `
-        };
-        renderComments();
+const reviewButtonElements = () => {
+      const reviewElements = document.querySelectorAll('.class-li');
+      console.log(reviewElements);
+           reviewElements.forEach((element, index) => {
+            console.log(element);
+            console.log(index);
+        element.addEventListener("click", (event) => {
+               if (element) {    
+            commentTextElement.value = `< ${comments[index].text}
+  ${comments[index].name} >
+  
+  
+          `
+          };
+          renderComments();
+        });
       });
-    });
-  };
+    };
 
 
   // кнопка лайк с подсчетом
@@ -184,7 +186,7 @@ ${comments[index].name}
   const renderComments = () => {
     const commentsHtml = comments
       .map((comment, index) => {
-        return `<li class="comment" data-name="${comment.name}">
+        return `<li class="comment class-li" data-name="${comment.name}">
           <div class="comment-header">
             <div>${comment.name}</div>
             <div>${currentDate.toLocaleDateString('ru-RU', optins)}</div>
@@ -194,7 +196,7 @@ ${comments[index].name}
             ${(comment.isEdit)
             ? `<textarea id="comment-text" type="textarea" class="add-form-text" placeholder="Введите ваш коментарий"
         rows="4">${comment.text}</textarea>`
-            : `<div class="comment-text">
+            : `<div class="comment-text class-div">
               ${comment.text}
               </div>`}
 
