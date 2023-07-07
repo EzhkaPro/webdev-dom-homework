@@ -106,6 +106,7 @@
     const changeButtonElements = document.querySelectorAll(".edit-form-button");
     for (const changeButtonElement of changeButtonElements) {
       changeButtonElement.addEventListener("click", (event) => {
+        event.stopPropagation();
         const index = changeButtonElement.dataset.index;
         if (comments[index].isEdit === false) {
           comments[index].isEdit = true;
@@ -122,26 +123,24 @@
     }
   }
 
-// Добавить комментарий
+  // Добавить комментарий
 
-const reviewButtonElements = () => {
-      const reviewElements = document.querySelectorAll('.class-li');
-      console.log(reviewElements);
-           reviewElements.forEach((element, index) => {
-            console.log(element);
-            console.log(index);
-        element.addEventListener("click", (event) => {
-               if (element) {    
-            commentTextElement.value = `< ${comments[index].text}
+  const reviewButtonElements = () => {
+    const reviewElements = document.querySelectorAll('.class-li');
+    reviewElements.forEach((element, index) => {
+
+      element.addEventListener("click", (event) => {
+          if (element) {
+          commentTextElement.value = `< ${comments[index].text}
   ${comments[index].name} >
   
   
           `
-          };
-          renderComments();
-        });
+        };
+        renderComments();
       });
-    };
+    });
+  };
 
 
   // кнопка лайк с подсчетом
@@ -151,6 +150,7 @@ const reviewButtonElements = () => {
 
     for (const likeButtonsElement of likeButtonsElements) {
       likeButtonsElement.addEventListener("click", (event) => {
+        event.stopPropagation();
         const index = likeButtonsElement.dataset.index;
         if (comments[index].isLiked === false) {
           comments[index].isLiked = true;
@@ -186,7 +186,7 @@ const reviewButtonElements = () => {
   const renderComments = () => {
     const commentsHtml = comments
       .map((comment, index) => {
-        return `<li class="comment class-li" data-name="${comment.name}">
+        return `<li class="comment  class-li" data-name="${comment.name}">
           <div class="comment-header">
             <div>${comment.name}</div>
             <div>${currentDate.toLocaleDateString('ru-RU', optins)}</div>
@@ -200,7 +200,7 @@ const reviewButtonElements = () => {
               ${comment.text}
               </div>`}
 
-              <button class="add-form-button edit-form-button" data-index="${index}" > ${(comment.isEdit)
+              <button class="add-form-button edit-form-button" data-index="${index}"> ${(comment.isEdit)
             ? `Сохранить` : `Изменить`} </button>
           </div>      
              
@@ -243,11 +243,15 @@ const reviewButtonElements = () => {
     comments.push({
       name: nameInputElement.value
         .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;"),
+        .replaceAll(">", "&gt;")
+        .replaceAll("&", "&amp;")
+        .replaceAll('"', "&quot;"),
       date: currentDate.toLocaleDateString('ru-RU', optins),
       text: commentTextElement.value
         .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;"),
+        .replaceAll(">", "&gt;")
+        .replaceAll("&", "&amp;")
+        .replaceAll('"', "&quot;"),
       like: 0,
       isLiked: false,
       isEdit: false,
