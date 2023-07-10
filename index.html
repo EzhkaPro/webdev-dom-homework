@@ -10,15 +10,24 @@
 <body>
   <div class="container">
     <ul id="list" class="comments">
-      <!-- Список рендерится из JS -->
+     
     </ul>
     <div class="add-form">
-      <input id="name-input" type="text" class="add-form-name" placeholder="Введите ваше имя" />
-      <textarea id="comment-text" type="textarea" class="add-form-text" placeholder="Введите ваш коментарий"
-        rows="4"></textarea>
+      <input id="name-input" 
+      type="text" 
+      class="add-form-name" 
+      placeholder="Введите ваше имя" 
+      value=""
+      />
+      <textarea id="comment-text" 
+      type="textarea" 
+      class="add-form-text" 
+      placeholder="Введите ваш коментарий"
+        rows="4"
+        value=""
+        ></textarea>
       <div class="add-form-row">
-        <button id="add-button" class="add-form-button" data-index="${index}" disabled> Написать</button>
-
+        <button id="add-button" class="add-form-button" data-index="${index}"> Написать</button>
       </div>
     </div>
   </div>
@@ -34,20 +43,70 @@
   }
 </style>
 
-
 <script>
 
   const buttonElement = document.getElementById('add-button');
   const listElement = document.getElementById('list');
   const nameInputElement = document.getElementById('name-input');
   const commentTextElement = document.getElementById('comment-text');
+ 
+  //Дата НЕВЕРНО
+  let currentDate = new Date();
+  function formatTime(currentDate) {
+    const date = currentDate.getDate().toString().padStart(2, "0");
+    const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
+    const year = currentDate.getFullYear();
+    const h = currentDate.getHours().toString().padStart(2, "0");
+    const m = currentDate.getMinutes().toString().padStart(2, "0");
 
-  const commentElements = document.querySelectorAll(".comment");
+    return `${date}.${month}.${year}, ${h}:${m}`
+    renderComments()
+  }
+  console.log(formatTime(currentDate));
+
+  //запросы API
+  function getComments() {
+    const fetchPromise = fetch('https://wedev-api.sky.pro/api/v1/:galina-lukianova/comments',
+      {
+        method: "GET"
+      }
+    );
+    fetchPromise.then((response) => {
+      const jsonPromise = response.json();
+
+      jsonPromise.then((responseData) => {
+        console.log(responseData);
+
+        const appComments = responseData.comments.map((comment) => {
+          return {
+            name: comment.author.name,
+            date: formatTime(currentDate),
+            text: comment.text,
+            likes: comment.likes,
+            isLiked: false,
+          }
+        })
+        comments = appComments;
+        renderComments()
+      })
+    });
+  };
+  getComments()
 
 
-  //Дата
-  const currentDate = new Date();
-  const optins = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+  // нажатие клавиши Enter по кнопке Написать
+  window.addEventListener('keyup', (e) => {
+    if (e.code == 'Enter' || e.code == 'NumpadEnter') {
+      if (nameInputElement.value == "" && commentTextElement.value == "") {
+
+        postComments()
+        renderComments();
+        nameInputElement.value = "";
+        commentTextElement.value = "";
+        buttonElement.classList.add("add-form-button_disabled");
+      }
+    };
+  });
 
 
   //кнопка тухнет если нет текста и имени
@@ -62,27 +121,35 @@
   commentTextElement.addEventListener("input", disableButton);
 
 
-  //массив
-  const comments = [
-    {
-      name: "Глеб Фокин",
-      date: "12.02.22 12:18",
-      text: "Это будет первый комментарий на этой странице",
-      like: 3,
-      isLiked: false,
-      isEdit: false,
-    },
-    {
-      name: "Варвара Н.",
-      date: "13.02.22 19:22",
-      text: "Мне нравится как оформлена эта страница! ❤",
-      like: 75,
-      isLiked: false,
-      isEdit: false,
-    }
-  ];
 
-  console.log(comments);
+  //массив
+  //TODU Получать из хранилища данных 
+  /* let comments = [
+     {
+       name: "Глеб Фокин",
+       date: "12.02.22 12:18",
+       text: "Это будет первый комментарий на этой странице",
+       like: 3,
+       isLiked: false,
+       isEdit: false,
+     },
+     {
+       name: "Варвара Н.",
+       date: "13.02.22 19:22",
+       text: "Мне нравится как оформлена эта страница! ❤",
+       like: 75,
+       isLiked: false,
+       isEdit: false,
+     }
+   ];
+ */
+
+  let comments = [];
+
+
+  const jsonComments = JSON.stringify(comments);  // преобразовывает массив в строку
+  const commentsFromJson = JSON.parse(jsonComments); // преобразовывает строку в массив
+
 
 
   // Добавляет обработчики кликов ко всем элементам с классом comment
@@ -93,20 +160,19 @@
     // Цикл for проходит по каждому элементу в списке
     for (const commentElement of commentElements) {
       // Добавляет обработчик клика на конкретный элемент в списке
-      commentElement.addEventListener("click", () => {
-        console.log(commentElement.dataset.name);
-      });
+      //  commentElement.addEventListener("click", (event) => {
+      //    console.log(commentElement.dataset.name);
+      //  });
     }
   };
 
 
-  //кнопка с полем ввода изменить комментарий ДОДеЛАТЬ
-
+//кнопка с полем ввода изменить комментарий
   const changeButtonElementsFunc = () => {
     const changeButtonElements = document.querySelectorAll(".edit-form-button");
     for (const changeButtonElement of changeButtonElements) {
       changeButtonElement.addEventListener("click", (event) => {
-        event.stopPropagation();
+         event.stopPropagation();
         const index = changeButtonElement.dataset.index;
         if (comments[index].isEdit === false) {
           comments[index].isEdit = true;
@@ -114,28 +180,27 @@
           comments[index].isEdit = false;
           //добавить изменение свойства coment.text сделать что бы в массиве свойство перезаписывалось
           if (element.children.length == 0) {
-            commentTextElement.value = `${comments[index].text}`;//???непонятно
+            commentTextElement.value = `${comments[index].text}`;
           }
-
         }
         renderComments()
       });
     }
   }
 
-  // Добавить комментарий
+
+  // Добавить комментарий  к уже готовому коменту
 
   const reviewButtonElements = () => {
     const reviewElements = document.querySelectorAll('.class-li');
     reviewElements.forEach((element, index) => {
 
       element.addEventListener("click", (event) => {
-          if (element) {
-          commentTextElement.value = `< ${comments[index].text}
-  ${comments[index].name} >
+        if (element) {
+          commentTextElement.value = `- ${comments[index].text}
+  ${comments[index].name} -
   
-  
-          `
+           `
         };
         renderComments();
       });
@@ -146,42 +211,20 @@
   // кнопка лайк с подсчетом
   const initLikeButtonsListeners = () => {
     const likeButtonsElements = document.querySelectorAll('.like-button');//кнопка
-    const iconButtonsElements = document.querySelectorAll('.likes-counter');// счет лайков
-
-    for (const likeButtonsElement of likeButtonsElements) {
+    likeButtonsElements.forEach((likeButtonsElement, index) => {
       likeButtonsElement.addEventListener("click", (event) => {
         event.stopPropagation();
-        const index = likeButtonsElement.dataset.index;
         if (comments[index].isLiked === false) {
           comments[index].isLiked = true;
-          comments[index].like += 1;
+          comments[index].likes += 1;
         } else {
           comments[index].isLiked = false;
-          comments[index].like -= 1;
+          comments[index].likes -= 1;
         }
-        console.log(comments[index].isLiked);
-        console.log(comments[index].like);
-
         renderComments()
       });
-    }
+    })
   };
-
-
-  // нажатие клавиши Enter ДОДеЛАТЬ
-
-  document.addEventListener('keyup', (e) => {
-    if (e.code == 'Enter' || e.code == 'NumpadEnter') {
-      if (!nameInputElement.value == "" && !commentTextElement.value == "") {
-
-        renderComments();
-        nameInputElement.value = "";
-        commentTextElement.value = "";
-        buttonElement.classList.add("add-form-button");
-      }
-    };
-  });
-
 
   const renderComments = () => {
     const commentsHtml = comments
@@ -189,28 +232,23 @@
         return `<li class="comment  class-li" data-name="${comment.name}">
           <div class="comment-header">
             <div>${comment.name}</div>
-            <div>${currentDate.toLocaleDateString('ru-RU', optins)}</div>
+            <div>${formatTime(currentDate)}</div>
           </div>
-
           <div class="comment-body">
-            ${(comment.isEdit)
-            ? `<textarea id="comment-text" type="textarea" class="add-form-text" placeholder="Введите ваш коментарий"
-        rows="4">${comment.text}</textarea>`
-            : `<div class="comment-text class-div">
-              ${comment.text}
-              </div>`}
-
-              <button class="add-form-button edit-form-button" data-index="${index}"> ${(comment.isEdit)
-            ? `Сохранить` : `Изменить`} </button>
+            <div data-answer='${index}' class="comment-text">
+            ${(comment.isEdit) ? `<textarea id="comment-text" type="textarea" class="add-form-text" placeholder="Введите ваш коментарий"
+        rows="4">${comment.text}</textarea>`: `<div class="comment-text class-div"> ${comment.text}</div>`}
+      </div> 
+              <button class="add-form-button edit-form-button" data-index="${index}"> ${(comment.isEdit) ? `Сохранить` : `Изменить`} </button>
           </div>      
              
           <div class="comment-footer">
             <div class="likes">
-              <span class="likes-counter">${comment.like}</span>
-              <button data-index="${index}" class="like-button ${(comment.isLiked) ? "active" : ""}" ></button>
+              <span class="likes-counter">${comment.likes}</span>
+              <button data-like='${index}' class="like-button ${(comment.isLiked) ? "active" : ''}" ></button>
             </div>
           </div>
-        </li>`;
+        </li>`
       })
       .join("");
 
@@ -220,13 +258,15 @@
     initLikeButtonsListeners();
     changeButtonElementsFunc();
     reviewButtonElements();
+    formatTime(currentDate);
   };
 
   renderComments();
 
 
   //красит поля если пустые
-  buttonElement.addEventListener("click", () => {
+  buttonElement.addEventListener("click", (event) => {
+
     nameInputElement.classList.remove("error");
     if (nameInputElement.value === "") {
       nameInputElement.classList.add("error");
@@ -239,26 +279,53 @@
     };
 
 
-    // пушит новый массив
-    comments.push({
-      name: nameInputElement.value
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll("&", "&amp;")
-        .replaceAll('"', "&quot;"),
-      date: currentDate.toLocaleDateString('ru-RU', optins),
-      text: commentTextElement.value
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll("&", "&amp;")
-        .replaceAll('"', "&quot;"),
-      like: 0,
-      isLiked: false,
-      isEdit: false,
-    });
+    /* // пушит новый массив
+     comments.push({
+       name: nameInputElement.value
+         .replaceAll("<", "&lt;")
+         .replaceAll(">", "&gt;")
+         .replaceAll("&", "&amp;")
+         .replaceAll('"', "&quot;"),
+       date: currentDate.toLocaleDateString('ru-RU', optins),
+       text: commentTextElement.value
+         .replaceAll("<", "&lt;")
+         .replaceAll(">", "&gt;")
+         .replaceAll("&", "&amp;")
+         .replaceAll('"', "&quot;"),
+       like: 0,
+       isLiked: false,
+       isEdit: false,
+ */
 
-    renderComments();
+    function postComments() {
+      fetch('https://wedev-api.sky.pro/api/v1/:galina-lukianova/comments',
+        {
+          method: "POST",
+          body: JSON.stringify({
+            name: nameInputElement.value
+              .replaceAll("&", "&amp;")
+              .replaceAll("<", "&lt;")
+              .replaceAll(">", "&gt;")
+              .replaceAll('"', "&quot;"),
+            date: `${formatTime(currentDate)}`,
+            likes: 0,
+            text: commentTextElement.value
+              .replaceAll("&", "&amp;")
+              .replaceAll("<", "&lt;")
+              .replaceAll(">", "&gt;")
+              .replaceAll('"', "&quot;"),
+            isLiked: false,
+          }),
+        }).then((response) => {
+          response.json().then((responseData) => {
+            getComments()
+          });
+        });
+      renderComments();
+    }
+    postComments()
 
+    
     //возвращает белые поля ввода текста и имени
     nameInputElement.value = "";
     commentTextElement.value = "";
