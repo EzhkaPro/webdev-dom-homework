@@ -12,19 +12,8 @@
     <ul id="list" class="comments">
      
     </ul>
-    <div class="add-form">
-      <input id="name-input" 
-      type="text" 
-      class="add-form-name" 
-      placeholder="Введите ваше имя" 
-      value=""
-      />
-      <textarea id="comment-text" 
-      type="textarea" 
-      class="add-form-text" 
-      placeholder="Введите ваш коментарий"
-        rows="4"
-        value=""
+    <div class="add-form"><input id="name-input" type="text" class="add-form-name" placeholder="Введите ваше имя" value=""/>
+      <textarea id="comment-text" type="textarea" class="add-form-text" placeholder="Введите ваш коментарий" rows="4" value=""
         ></textarea>
       <div class="add-form-row">
         <button id="add-button" class="add-form-button" data-index="${index}"> Написать</button>
@@ -166,7 +155,6 @@
     }
   };
 
-
 //кнопка с полем ввода изменить комментарий
   const changeButtonElementsFunc = () => {
     const changeButtonElements = document.querySelectorAll(".edit-form-button");
@@ -188,7 +176,6 @@
     }
   }
 
-
   // Добавить комментарий  к уже готовому коменту
 
   const reviewButtonElements = () => {
@@ -206,7 +193,6 @@
       });
     });
   };
-
 
   // кнопка лайк с подсчетом
   const initLikeButtonsListeners = () => {
@@ -325,7 +311,7 @@
     }
     postComments()
 
-    
+
     //возвращает белые поля ввода текста и имени
     nameInputElement.value = "";
     commentTextElement.value = "";
