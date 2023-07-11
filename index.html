@@ -230,6 +230,7 @@
     }
   }
 
+  
   // Клик на поле комментариев для добавления коммента к уже готовому коменту
 
   const reviewButtonElements = () => {
@@ -249,6 +250,7 @@
     });
   };
 
+
   // кнопка лайк с подсчетом
   const initLikeButtonsListeners = () => {
     const likeButtonsElements = document.querySelectorAll('.like-button');//кнопка
@@ -266,6 +268,7 @@
       });
     })
   };
+
 
   const renderComments = () => {
     const commentsHtml = comments
@@ -300,6 +303,7 @@
     reviewButtonElements();
     formatTime(currentDate);
   };
+
 
   renderComments();
 
