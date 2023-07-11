@@ -10,11 +10,16 @@
 <body>
   <div class="container">
     <ul id="list" class="comments">
-     
+
     </ul>
-    <div class="add-form"><input id="name-input" type="text" class="add-form-name" placeholder="Введите ваше имя" value=""/>
-      <textarea id="comment-text" type="textarea" class="add-form-text" placeholder="Введите ваш коментарий" rows="4" value=""
-        ></textarea>
+    <div id="comment-hover">
+      <p>Комментарий добавляется...</p>
+    </div>
+    <div class="add-form" id="add-form-disable">
+      <input id="name-input" type="text" class="add-form-name" placeholder="Введите ваше имя"
+        value="" />
+      <textarea id="comment-text" type="textarea" class="add-form-text" placeholder="Введите ваш коментарий" rows="4"
+        value=""></textarea>
       <div class="add-form-row">
         <button id="add-button" class="add-form-button" data-index="${index}"> Написать</button>
       </div>
@@ -38,8 +43,99 @@
   const listElement = document.getElementById('list');
   const nameInputElement = document.getElementById('name-input');
   const commentTextElement = document.getElementById('comment-text');
- 
-  //Дата НЕВЕРНО
+
+  let comments = [];
+
+
+  const jsonComments = JSON.stringify(comments);  // преобразовывает массив в строку
+  const commentsFromJson = JSON.parse(jsonComments); // преобразовывает строку в массив
+
+  const startAt = Date.now();
+  console.log('запрос обрабатывается')
+
+  //запросы API
+  function getComments() {
+    buttonElement.disabled = true;
+    buttonElement.textContent = "Данные загружаются...";
+
+    fetch('https://wedev-api.sky.pro/api/v1/:galina-lukianova/comments', {
+      method: "GET"
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((response) => {
+        console.log(Date.now() - startAt);
+        return response;
+      })
+      .then((responseData) => {
+        console.log(responseData);
+
+        const appComments = responseData.comments.map((comment) => {
+          return {
+            name: comment.author.name,
+            date: formatTime(new Date(comment.date)),
+            text: comment.text,
+            likes: comment.likes,
+            isLiked: false,
+          }
+        })
+        comments = appComments;
+        renderComments();
+      })
+      .then((data) => {
+        buttonElement.disabled = false;
+        buttonElement.textContent = "Написать";
+        document.getElementById('comment-hover').style.display = 'none';
+        document.getElementById('add-form-disable').style.display = 'flex';
+      });
+  }
+  getComments()
+
+  document.getElementById('comment-hover').style.display = 'none';
+
+
+  function postComments() {
+    document.getElementById('comment-hover').style.display = 'flex';
+    document.getElementById('add-form-disable').style.display = 'none';
+
+    fetch('https://wedev-api.sky.pro/api/v1/:galina-lukianova/comments', {
+      method: "POST",
+      body: JSON.stringify({
+        name: nameInputElement.value
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;"),
+        date: formatTime(new Date),
+        likes: 0,
+        text: commentTextElement.value
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;"),
+        isLiked: false,
+      })
+    })
+    .then((response) => {
+        return response.json();
+      })
+      .then((response) => {
+        console.log(Date.now() - startAt);
+        return response;
+      })
+      .then((responseData) => {
+        getComments();
+      })
+      .then((response) => {
+        console.log(Date.now() - startAt);
+        return response;
+      })
+    renderComments();
+  }
+
+
+  //Дата 
   let currentDate = new Date();
   function formatTime(currentDate) {
     const date = currentDate.getDate().toString().padStart(2, "0");
@@ -53,36 +149,6 @@
   }
   console.log(formatTime(currentDate));
 
-  //запросы API
-  function getComments() {
-    const fetchPromise = fetch('https://wedev-api.sky.pro/api/v1/:galina-lukianova/comments',
-      {
-        method: "GET"
-      }
-    );
-    fetchPromise.then((response) => {
-      const jsonPromise = response.json();
-
-      jsonPromise.then((responseData) => {
-        console.log(responseData);
-
-        const appComments = responseData.comments.map((comment) => {
-          return {
-            name: comment.author.name,
-            date: formatTime(currentDate),
-            text: comment.text,
-            likes: comment.likes,
-            isLiked: false,
-          }
-        })
-        comments = appComments;
-        renderComments()
-      })
-    });
-  };
-  getComments()
-
-
   // нажатие клавиши Enter по кнопке Написать
   window.addEventListener('keyup', (e) => {
     if (e.code == 'Enter' || e.code == 'NumpadEnter') {
@@ -92,7 +158,6 @@
         renderComments();
         nameInputElement.value = "";
         commentTextElement.value = "";
-        buttonElement.classList.add("add-form-button_disabled");
       }
     };
   });
@@ -110,36 +175,25 @@
   commentTextElement.addEventListener("input", disableButton);
 
 
+  //красит поля если пустые
+  buttonElement.addEventListener("click", (event) => {
 
-  //массив
-  //TODU Получать из хранилища данных 
-  /* let comments = [
-     {
-       name: "Глеб Фокин",
-       date: "12.02.22 12:18",
-       text: "Это будет первый комментарий на этой странице",
-       like: 3,
-       isLiked: false,
-       isEdit: false,
-     },
-     {
-       name: "Варвара Н.",
-       date: "13.02.22 19:22",
-       text: "Мне нравится как оформлена эта страница! ❤",
-       like: 75,
-       isLiked: false,
-       isEdit: false,
-     }
-   ];
- */
+    nameInputElement.classList.remove("error");
+    if (nameInputElement.value === "") {
+      nameInputElement.classList.add("error");
+      return
+    };
+    commentTextElement.classList.remove("error");
+    if (commentTextElement.value === "") {
+      commentTextElement.classList.add("error");
+      return
+    };
 
-  let comments = [];
-
-
-  const jsonComments = JSON.stringify(comments);  // преобразовывает массив в строку
-  const commentsFromJson = JSON.parse(jsonComments); // преобразовывает строку в массив
-
-
+    postComments()
+    renderComments()
+    nameInputElement.value = "";
+    commentTextElement.value = "";
+  });
 
   // Добавляет обработчики кликов ко всем элементам с классом comment
   const initEventListeners = () => {
@@ -155,12 +209,13 @@
     }
   };
 
-//кнопка с полем ввода изменить комментарий
+  //кнопка с полем ввода изменить комментарий
   const changeButtonElementsFunc = () => {
     const changeButtonElements = document.querySelectorAll(".edit-form-button");
     for (const changeButtonElement of changeButtonElements) {
       changeButtonElement.addEventListener("click", (event) => {
-         event.stopPropagation();
+        event.stopPropagation();
+        const editCommentText = document.querySelector('.edit-form-text')
         const index = changeButtonElement.dataset.index;
         if (comments[index].isEdit === false) {
           comments[index].isEdit = true;
@@ -168,7 +223,7 @@
           comments[index].isEdit = false;
           //добавить изменение свойства coment.text сделать что бы в массиве свойство перезаписывалось
           if (element.children.length == 0) {
-            commentTextElement.value = `${comments[index].text}`;
+            editCommentText.value = `${comments[index].text}`;
           }
         }
         renderComments()
@@ -176,13 +231,14 @@
     }
   }
 
-  // Добавить комментарий  к уже готовому коменту
+  // Клик на поле комментариев для добавления коммента к уже готовому коменту
 
   const reviewButtonElements = () => {
     const reviewElements = document.querySelectorAll('.class-li');
     reviewElements.forEach((element, index) => {
 
       element.addEventListener("click", (event) => {
+        event.stopPropagation();
         if (element) {
           commentTextElement.value = `- ${comments[index].text}
   ${comments[index].name} -
@@ -218,13 +274,12 @@
         return `<li class="comment  class-li" data-name="${comment.name}">
           <div class="comment-header">
             <div>${comment.name}</div>
-            <div>${formatTime(currentDate)}</div>
+            <div>${comment.date}</div>
           </div>
           <div class="comment-body">
             <div data-answer='${index}' class="comment-text">
-            ${(comment.isEdit) ? `<textarea id="comment-text" type="textarea" class="add-form-text" placeholder="Введите ваш коментарий"
-        rows="4">${comment.text}</textarea>`: `<div class="comment-text class-div"> ${comment.text}</div>`}
-      </div> 
+            ${(comment.isEdit) ? `<textarea class="edit-form-text" >${comment.text}</textarea>` : `${comment.text}`}
+           </div> 
               <button class="add-form-button edit-form-button" data-index="${index}"> ${(comment.isEdit) ? `Сохранить` : `Изменить`} </button>
           </div>      
              
@@ -248,74 +303,6 @@
   };
 
   renderComments();
-
-
-  //красит поля если пустые
-  buttonElement.addEventListener("click", (event) => {
-
-    nameInputElement.classList.remove("error");
-    if (nameInputElement.value === "") {
-      nameInputElement.classList.add("error");
-      return
-    };
-    commentTextElement.classList.remove("error");
-    if (commentTextElement.value === "") {
-      commentTextElement.classList.add("error");
-      return
-    };
-
-
-    /* // пушит новый массив
-     comments.push({
-       name: nameInputElement.value
-         .replaceAll("<", "&lt;")
-         .replaceAll(">", "&gt;")
-         .replaceAll("&", "&amp;")
-         .replaceAll('"', "&quot;"),
-       date: currentDate.toLocaleDateString('ru-RU', optins),
-       text: commentTextElement.value
-         .replaceAll("<", "&lt;")
-         .replaceAll(">", "&gt;")
-         .replaceAll("&", "&amp;")
-         .replaceAll('"', "&quot;"),
-       like: 0,
-       isLiked: false,
-       isEdit: false,
- */
-
-    function postComments() {
-      fetch('https://wedev-api.sky.pro/api/v1/:galina-lukianova/comments',
-        {
-          method: "POST",
-          body: JSON.stringify({
-            name: nameInputElement.value
-              .replaceAll("&", "&amp;")
-              .replaceAll("<", "&lt;")
-              .replaceAll(">", "&gt;")
-              .replaceAll('"', "&quot;"),
-            date: `${formatTime(currentDate)}`,
-            likes: 0,
-            text: commentTextElement.value
-              .replaceAll("&", "&amp;")
-              .replaceAll("<", "&lt;")
-              .replaceAll(">", "&gt;")
-              .replaceAll('"', "&quot;"),
-            isLiked: false,
-          }),
-        }).then((response) => {
-          response.json().then((responseData) => {
-            getComments()
-          });
-        });
-      renderComments();
-    }
-    postComments()
-
-
-    //возвращает белые поля ввода текста и имени
-    nameInputElement.value = "";
-    commentTextElement.value = "";
-  });
 
 </script>
 
