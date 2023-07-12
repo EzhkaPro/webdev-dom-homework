@@ -12,12 +12,14 @@
     <ul id="list" class="comments">
 
     </ul>
+    <div id="loading-comment">
+      <p>Подождие, комментарии загружаются...</p>
+    </div>
     <div id="comment-hover">
       <p>Комментарий добавляется...</p>
     </div>
     <div class="add-form" id="add-form-disable">
-      <input id="name-input" type="text" class="add-form-name" placeholder="Введите ваше имя"
-        value="" />
+      <input id="name-input" type="text" class="add-form-name" placeholder="Введите ваше имя" value="" />
       <textarea id="comment-text" type="textarea" class="add-form-text" placeholder="Введите ваш коментарий" rows="4"
         value=""></textarea>
       <div class="add-form-row">
@@ -46,17 +48,18 @@
 
   let comments = [];
 
-
   const jsonComments = JSON.stringify(comments);  // преобразовывает массив в строку
   const commentsFromJson = JSON.parse(jsonComments); // преобразовывает строку в массив
 
   const startAt = Date.now();
   console.log('запрос обрабатывается')
 
+
   //запросы API
   function getComments() {
     buttonElement.disabled = true;
     buttonElement.textContent = "Данные загружаются...";
+    document.getElementById('loading-comment').style.display = 'flex';
 
     fetch('https://wedev-api.sky.pro/api/v1/:galina-lukianova/comments', {
       method: "GET"
@@ -65,7 +68,6 @@
         return response.json();
       })
       .then((response) => {
-        console.log(Date.now() - startAt);
         return response;
       })
       .then((responseData) => {
@@ -88,9 +90,12 @@
         buttonElement.textContent = "Написать";
         document.getElementById('comment-hover').style.display = 'none';
         document.getElementById('add-form-disable').style.display = 'flex';
-      });
+        document.getElementById('loading-comment').style.display = 'none';
+      })
   }
   getComments()
+
+
 
   document.getElementById('comment-hover').style.display = 'none';
 
@@ -117,7 +122,7 @@
         isLiked: false,
       })
     })
-    .then((response) => {
+      .then((response) => {
         return response.json();
       })
       .then((response) => {
@@ -230,7 +235,7 @@
     }
   }
 
-  
+
   // Клик на поле комментариев для добавления коммента к уже готовому коменту
 
   const reviewButtonElements = () => {
