@@ -46,6 +46,47 @@
   const nameInputElement = document.getElementById('name-input');
   const commentTextElement = document.getElementById('comment-text');
 
+
+  const renderComments = () => {
+    const commentsHtml = comments
+      .map((comment, index) => {
+        return `<li class="comment  class-li" data-name="${comment.name}">
+          <div class="comment-header">
+            <div>${comment.name}</div>
+            <div>${comment.date}</div>
+          </div>
+          <div class="comment-body">
+            <div data-answer='${index}' class="comment-text">
+            ${(comment.isEdit) ? `<textarea class="edit-form-text" >${comment.text}</textarea>` : `${comment.text}`}
+           </div> 
+            
+        </div> 
+              <button class="add-form-button edit-form-button" data-index="${index}"> ${(comment.isEdit) ? `Сохранить` : `Изменить`} </button>
+              <button data-id="${comment.id}" class="add-form-button button delete-button">Удалить</button>
+              </div>    
+          <div class="comment-footer">
+            <div class="likes">
+              <span class="likes-counter">${comment.likes}</span>
+              <button data-like='${index}' class="like-button ${(comment.isLiked) ? "active" : ''}" ></button>
+            </div>
+          </div>
+        </li>`
+      })
+      .join("");
+
+    listElement.innerHTML = commentsHtml;
+
+    initEventListeners();
+    initLikeButtonsListeners();
+    changeButtonElementsFunc();
+    reviewButtonElements();
+    //deleteComments();
+    formatTime(currentDate);
+  };
+
+  //renderComments();
+
+
   let comments = [];
 
   const jsonComments = JSON.stringify(comments);  // преобразовывает массив в строку
@@ -99,8 +140,8 @@
 
   document.getElementById('comment-hover').style.display = 'none';
 
-
   function postComments() {
+
     document.getElementById('comment-hover').style.display = 'flex';
     document.getElementById('add-form-disable').style.display = 'none';
 
@@ -120,24 +161,67 @@
           .replaceAll(">", "&gt;")
           .replaceAll('"', "&quot;"),
         isLiked: false,
+        forceError: true,
       })
     })
       .then((response) => {
-        return response.json();
-      })
-      .then((response) => {
-        console.log(Date.now() - startAt);
-        return response;
+        console.log(response);
+       if (response.status === 201) {
+          return response.json();
+        } else {
+          return Promise.reject(new Error("Сервер упал"));
+        }  
       })
       .then((responseData) => {
         getComments();
+        renderComments();
       })
-      .then((response) => {
-        console.log(Date.now() - startAt);
-        return response;
+      .then(() => {
+        buttonElement.disabled = false;
+        buttonElement.textContent = "Написать";
+        document.getElementById('loading-comment').style.display = 'none';
+        nameInputElement.value = "";
+        commentTextElement.value = "";
       })
+      .catch((error) => {
+        alert("Кажется что-то пошло не так попробуй позже");
+        buttonElement.disabled = false;
+        buttonElement.textContent = "Написать";
+        document.getElementById('comment-hover').style.display = 'none';
+        document.getElementById('add-form-disable').style.display = 'flex';
+        document.getElementById('loading-comment').style.display = 'none';
+        console.warn(error);
+      })
+
     renderComments();
   }
+
+
+
+  /*const deleteComments = () => {
+      
+      const deleteButtons = document.querySelectorAll(".delete-button");
+
+      for (const deleteButton of deleteButtons) {
+        deleteButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+
+          const id = deleteButton.dataset.id;
+       
+          fetch("'https://wedev-api.sky.pro/api/v1/:galina-lukianova/comments/" + id, {
+            method: "DELETE",
+          }).then((response) => {
+            response.json().then((responseData) => {
+              comments = appComments;
+              renderComments();
+            });
+          });
+          renderComments();
+        });
+      }
+    };
+*/
+
 
   //Дата 
   let currentDate = new Date();
@@ -153,15 +237,23 @@
   }
   console.log(formatTime(currentDate));
 
+
+  //кнопка Написать
+  buttonElement.addEventListener("click", (event) => {
+    postComments()
+    renderComments()
+  });
+
+
   // нажатие клавиши Enter по кнопке Написать
-  window.addEventListener('keyup', (e) => {
+  document.addEventListener('keyup', (e) => {
+    e.stopPropagation();
     if (e.code == 'Enter' || e.code == 'NumpadEnter') {
       if (nameInputElement.value == "" && commentTextElement.value == "") {
 
         postComments()
         renderComments();
-        nameInputElement.value = "";
-        commentTextElement.value = "";
+        const changeButtonElements = document.querySelectorAll(".edit-form-button");
       }
     };
   });
@@ -195,8 +287,6 @@
 
     postComments()
     renderComments()
-    nameInputElement.value = "";
-    commentTextElement.value = "";
   });
 
   // Добавляет обработчики кликов ко всем элементам с классом comment
@@ -237,7 +327,6 @@
 
 
   // Клик на поле комментариев для добавления коммента к уже готовому коменту
-
   const reviewButtonElements = () => {
     const reviewElements = document.querySelectorAll('.class-li');
     reviewElements.forEach((element, index) => {
@@ -273,44 +362,6 @@
       });
     })
   };
-
-
-  const renderComments = () => {
-    const commentsHtml = comments
-      .map((comment, index) => {
-        return `<li class="comment  class-li" data-name="${comment.name}">
-          <div class="comment-header">
-            <div>${comment.name}</div>
-            <div>${comment.date}</div>
-          </div>
-          <div class="comment-body">
-            <div data-answer='${index}' class="comment-text">
-            ${(comment.isEdit) ? `<textarea class="edit-form-text" >${comment.text}</textarea>` : `${comment.text}`}
-           </div> 
-              <button class="add-form-button edit-form-button" data-index="${index}"> ${(comment.isEdit) ? `Сохранить` : `Изменить`} </button>
-          </div>      
-             
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">${comment.likes}</span>
-              <button data-like='${index}' class="like-button ${(comment.isLiked) ? "active" : ''}" ></button>
-            </div>
-          </div>
-        </li>`
-      })
-      .join("");
-
-    listElement.innerHTML = commentsHtml;
-
-    initEventListeners();
-    initLikeButtonsListeners();
-    changeButtonElementsFunc();
-    reviewButtonElements();
-    formatTime(currentDate);
-  };
-
-
-  renderComments();
 
 </script>
 
