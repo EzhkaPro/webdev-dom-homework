@@ -29,16 +29,6 @@
   </div>
 </body>
 
-<style>
-  .error {
-    background-color: #e4b7e1;
-  }
-
-  .active {
-    background-image: url("data:image/svg+xml,%3Csvg width='22' height='20' viewBox='0 0 22 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15.95 0C14.036 0 12.199 0.882834 11 2.26703C9.801 0.882834 7.964 0 6.05 0C2.662 0 0 2.6267 0 5.99455C0 10.1035 3.74 13.4714 9.405 18.5613L11 20L12.595 18.5613C18.26 13.4714 22 10.1035 22 5.99455C22 2.6267 19.338 0 15.95 0Z' fill='%23BCEC30'/%3E%3C/svg%3E");
-  }
-</style>
-
 <script>
 
   const buttonElement = document.getElementById('add-button');
@@ -98,8 +88,8 @@
 
   //запросы API
   function getComments() {
-    buttonElement.disabled = true;
-    buttonElement.textContent = "Данные загружаются...";
+    //buttonElement.disabled = true;
+    //buttonElement.textContent = "Данные загружаются...";
     document.getElementById('loading-comment').style.display = 'flex';
 
     fetch('https://wedev-api.sky.pro/api/v1/:galina-lukianova/comments', {
@@ -107,9 +97,6 @@
     })
       .then((response) => {
         return response.json();
-      })
-      .then((response) => {
-        return response;
       })
       .then((responseData) => {
         console.log(responseData);
@@ -135,8 +122,6 @@
       })
   }
   getComments()
-
-
 
   document.getElementById('comment-hover').style.display = 'none';
 
@@ -166,36 +151,32 @@
     })
       .then((response) => {
         console.log(response);
-       if (response.status === 201) {
+        if (response.status === 201) {
           return response.json();
+        } if (response.status === 400) {
+          throw new Error("Количество символов в сообщении должно быть больше 3");
         } else {
-          return Promise.reject(new Error("Сервер упал"));
-        }  
+          throw new Error("Кажется что-то пошло не так, попробуйте позже");
+        };
       })
       .then((responseData) => {
         getComments();
         renderComments();
-      })
-      .then(() => {
-        buttonElement.disabled = false;
-        buttonElement.textContent = "Написать";
-        document.getElementById('loading-comment').style.display = 'none';
         nameInputElement.value = "";
         commentTextElement.value = "";
       })
       .catch((error) => {
-        alert("Кажется что-то пошло не так попробуй позже");
         buttonElement.disabled = false;
         buttonElement.textContent = "Написать";
         document.getElementById('comment-hover').style.display = 'none';
         document.getElementById('add-form-disable').style.display = 'flex';
         document.getElementById('loading-comment').style.display = 'none';
+        alert(error.message)
         console.warn(error);
-      })
+      });
+  };
 
-    renderComments();
-  }
-
+  getComments()
 
 
   /*const deleteComments = () => {
@@ -240,24 +221,26 @@
 
   //кнопка Написать
   buttonElement.addEventListener("click", (event) => {
+    //  nameInputElement.value = "";
+    //    commentTextElement.value = "";
     postComments()
     renderComments()
   });
 
-
-  // нажатие клавиши Enter по кнопке Написать
-  document.addEventListener('keyup', (e) => {
-    e.stopPropagation();
-    if (e.code == 'Enter' || e.code == 'NumpadEnter') {
-      if (nameInputElement.value == "" && commentTextElement.value == "") {
-
-        postComments()
-        renderComments();
-        const changeButtonElements = document.querySelectorAll(".edit-form-button");
-      }
-    };
-  });
-
+  /*
+    // нажатие клавиши Enter по кнопке Написать
+    document.addEventListener('keyup', (e) => {
+      e.stopPropagation();
+      if (e.code == 'Enter' || e.code == 'NumpadEnter') {
+        if (nameInputElement.value == "" && commentTextElement.value == "") {
+  
+          postComments()
+          renderComments();
+          const changeButtonElements = document.querySelectorAll(".edit-form-button");
+        }
+      };
+    });
+  */
 
   //кнопка тухнет если нет текста и имени
   const disableButton = () => {
