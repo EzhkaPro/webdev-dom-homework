@@ -109,7 +109,7 @@ function postComments() {
     .then((response) => {
       console.log(response);
       if (response.status === 201) {
-        //document.getElementById('comment-hover').style.display = 'none';
+        document.getElementById('comment-hover').style.display = 'none';
         return response.json();
       } if (response.status === 400) {
         throw new Error("Количество символов в сообщении должно быть больше 3");
@@ -129,7 +129,7 @@ function postComments() {
       buttonElement.textContent = "Написать";
       document.getElementById('add-form-disable').style.display = 'flex';
       document.getElementById('loading-comment').style.display = 'none';
-      document.getElementById('comment-hover').style.display = 'flex';//ok
+      document.getElementById('comment-hover').style.display = 'flex';
 
       alert(error.message)
       console.warn(error);
@@ -150,13 +150,10 @@ function formatTime(currentDate) {
 }
 console.log(formatTime(currentDate));
 
-
-//кнопка Написать
 buttonElement.addEventListener("click", (event) => {
   postComments()
   renderComments()
 });
-
 
 const disableButton = () => {
   if (nameInputElement.value && commentTextElement.value) {
@@ -167,7 +164,6 @@ const disableButton = () => {
 };
 nameInputElement.addEventListener("input", disableButton);
 commentTextElement.addEventListener("input", disableButton);
-
 
 
 buttonElement.addEventListener("click", (event) => {
@@ -185,20 +181,16 @@ buttonElement.addEventListener("click", (event) => {
   renderComments()
 });
 
-// Добавляет обработчики кликов ко всем элементам с классом comment
-const initEventListeners = () => {
-  // Находит все элементы с классом comment в разметке
-  const commentElements = document.querySelectorAll(".comment");
 
-  // Цикл for проходит по каждому элементу в списке
+const initEventListeners = () => {
+   const commentElements = document.querySelectorAll(".comment");
+ 
   for (const commentElement of commentElements) {
-    // Добавляет обработчик клика на конкретный элемент в списке
-    //  commentElement.addEventListener("click", (event) => {
-    //    console.log(commentElement.dataset.name);
-    //  });
+    commentElement.addEventListener("click", () => {
+    //console.log(commentElement.dataset.name);
+    });
   }
 };
-
 
 const changeButtonElementsFunc = () => {
   const changeButtonElements = document.querySelectorAll(".edit-form-button");
