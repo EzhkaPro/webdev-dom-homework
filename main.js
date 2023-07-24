@@ -1,47 +1,15 @@
-import { mainGetComments, mainPostComments } from "./api.js";
+import { getComments, postComments } from "./api.js";
+import { renderComments } from "./renderComments.js";
+import { formatTime } from "./formatTime.js";
+import { renderLogin } from "./LoginPage.js";
+import { initLikeButtonsListeners } from "./like.js";
 
-const buttonElement = document.getElementById('add-button');
-const listElement = document.getElementById('list');
-const nameInputElement = document.getElementById('name-input');
-const commentTextElement = document.getElementById('comment-text');
 
 
-const renderComments = () => {
-  const commentsHtml = comments
-    .map((comment, index) => {
-      return `<li class="comment  class-li" data-name="${comment.name}">
-          <div class="comment-header">
-            <div>${comment.name}</div>
-            <div>${comment.date}</div>
-          </div>
-          <div class="comment-body">
-            <div data-answer='${index}' class="comment-text">
-            ${(comment.isEdit) ? `<textarea class="edit-form-text" >${comment.text}</textarea>` : `${comment.text}`}
-           </div> 
-            
-        </div> 
-              <button class="add-form-button edit-form-button" data-index="${index}"> ${(comment.isEdit) ? `Сохранить` : `Изменить`} </button>
-              <button data-id="${comment.id}" class="add-form-button button delete-button">Удалить</button>
-              </div>    
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">${comment.likes}</span>
-              <button data-like='${index}' class="like-button ${(comment.isLiked) ? "active" : ''}" ></button>
-            </div>
-          </div>
-        </li>`
-    })
-    .join("");
-
-  listElement.innerHTML = commentsHtml;
-
-  initEventListeners();
-  initLikeButtonsListeners();
-  changeButtonElementsFunc();
-  reviewButtonElements();
-  formatTime(currentDate);
-};
-
+export const buttonElement = document.getElementById('add-button');
+export const listElement = document.getElementById('list');
+export const nameInputElement = document.getElementById('name-input');
+export const commentTextElement = document.getElementById('comment-text');
 
 let comments = [];
 
@@ -52,34 +20,35 @@ const startAt = Date.now();
 console.log('запрос обрабатывается')
 
 
-document.getElementById('comment-hover').style.display = 'none';
+//renderComments({ initEventListeners, initLikeButtonsListeners, changeButtonElementsFunc,reviewButtonElements, formatTime });
 
-function getComments() {
-  document.getElementById('loading-comment').style.display = 'flex';
-  mainGetComments()
-    .then((responseData) => {
-      console.log(responseData);
-      const appComments = responseData.comments.map((comment) => {
-        return {
-          name: comment.author.name,
-          date: formatTime(new Date(comment.date)),
-          text: comment.text,
-          likes: comment.likes,
-          isLiked: false,
-        };
-      })
-      comments = appComments;
-      renderComments();
+renderLogin({listElement, listElementData});
+//document.getElementById('add-form-disable').style.display = 'none';//скрывает форму добавления комментария
+
+function mainGetComments() {
+  document.getElementById('loading-comment').style.display = 'none';
+  getComments().then((responseData) => {
+    console.log(responseData);
+    const appComments = responseData.comments.map((comment) => {
+      return {
+        name: comment.author.name,
+        date: formatTime(new Date(comment.date)),
+        text: comment.text,
+        likes: comment.likes,
+        isLiked: false,
+      };
     })
+    comments = appComments;
+    renderComments({ comments, initEventListeners, initLikeButtonsListeners, changeButtonElementsFunc, reviewButtonElements, formatTime });
+  })
     .then((data) => {
       buttonElement.disabled = false;
       buttonElement.textContent = "Написать";
-      document.getElementById('add-form-disable').style.display = 'flex';
-      document.getElementById('loading-comment').style.display = 'none';
-      document.getElementById('comment-hover').style.display = 'none';
     })
 }
-getComments()
+mainGetComments();
+
+renderLogin();
 
 document.getElementById('comment-hover').style.display = 'none';
 
@@ -94,29 +63,19 @@ getComments()
 
 
 
-function postComments() {
+function mainPostComments() {
+  document.getElementById('loading-comment').style.display = 'none';
   document.getElementById('comment-hover').style.display = 'none';
   document.getElementById('add-form-disable').style.display = 'none';
 
-  mainPostComments({
+  postComments({
     name: sanitizeHtml(nameInputElement.value),
-    date: formatTime(new Date),
+    date: formatTime(new Date()),
     likes: 0,
     text: sanitizeHtml(commentTextElement.value),
     isLiked: false,
     forceError: true,
   })
-    .then((response) => {
-      console.log(response);
-      if (response.status === 201) {
-        document.getElementById('comment-hover').style.display = 'none';
-        return response.json();
-      } if (response.status === 400) {
-        throw new Error("Количество символов в сообщении должно быть больше 3");
-      } else {
-        throw new Error("Кажется что-то пошло не так, попробуйте позже");
-      };
-    })
     .then((responseData) => {
       console.log(responseData);
       getComments();
@@ -127,9 +86,9 @@ function postComments() {
     .catch((error) => {
       buttonElement.disabled = false;
       buttonElement.textContent = "Написать";
-      document.getElementById('add-form-disable').style.display = 'flex';
+      document.getElementById('add-form-disable').style.display = 'none';
       document.getElementById('loading-comment').style.display = 'none';
-      document.getElementById('comment-hover').style.display = 'flex';
+      document.getElementById('comment-hover').style.display = 'none';
 
       alert(error.message)
       console.warn(error);
@@ -137,21 +96,9 @@ function postComments() {
 };
 
 
-let currentDate = new Date();
-function formatTime(currentDate) {
-  const date = currentDate.getDate().toString().padStart(2, "0");
-  const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
-  const year = currentDate.getFullYear();
-  const h = currentDate.getHours().toString().padStart(2, "0");
-  const m = currentDate.getMinutes().toString().padStart(2, "0");
-
-  return `${date}.${month}.${year}, ${h}:${m}`
-  renderComments()
-}
-console.log(formatTime(currentDate));
 
 buttonElement.addEventListener("click", (event) => {
-  postComments()
+  mainPostComments()
   renderComments()
 });
 
@@ -183,11 +130,10 @@ buttonElement.addEventListener("click", (event) => {
 
 
 const initEventListeners = () => {
-   const commentElements = document.querySelectorAll(".comment");
- 
+  const commentElements = document.querySelectorAll(".comment");
+
   for (const commentElement of commentElements) {
     commentElement.addEventListener("click", () => {
-    //console.log(commentElement.dataset.name);
     });
   }
 };
@@ -212,6 +158,7 @@ const changeButtonElementsFunc = () => {
   }
 }
 
+//отзыв на коммент
 const reviewButtonElements = () => {
   const reviewElements = document.querySelectorAll('.class-li');
   reviewElements.forEach((element, index) => {
@@ -229,7 +176,10 @@ const reviewButtonElements = () => {
   });
 };
 
-const initLikeButtonsListeners = () => {
+
+
+initLikeButtonsListeners(); //Like
+/*const initLikeButtonsListeners = () => {
   const likeButtonsElements = document.querySelectorAll('.like-button');//кнопка
   likeButtonsElements.forEach((likeButtonsElement, index) => {
     likeButtonsElement.addEventListener("click", (event) => {
@@ -244,4 +194,4 @@ const initLikeButtonsListeners = () => {
       renderComments()
     });
   })
-};
+};*/
