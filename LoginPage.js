@@ -14,7 +14,6 @@ export const renderLogin = ({ listElement, comments }) => {
       <a class="form-register" href="#" id="register">Зарегистрироваться</a>
     </div>
     `;
-
             appElement.innerHtml = loginHtml;
 
             listElement.style.display = "none";
