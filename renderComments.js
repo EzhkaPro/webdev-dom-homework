@@ -1,18 +1,11 @@
-import { 
-  buttonElement, 
-  listElement, 
-  nameInputElement, 
-  commentTextElement } from "../main.js";
+import { listElement, buttonElement, nameInputElement, commentTextElement } from "../main.js";
+import {initLikeButtonsListeners } from "./likeEvent.js"
 
 
-
-export const renderComments = ({comments, listElement, initEventListeners, 
-  initLikeButtonsListeners, changeButtonElementsFunc,reviewButtonElements, formatTime }) => {
-    listElement.innerHTML = listElementData;
-    const appElement = document.getElementById("app");
-  const commentsHtml = comments
-      .map((comment, index) => {
-        return `<li class="comment  class-li" data-name="${comment.name}">
+export const renderComments = ({  comments }) => {
+    listElement.innerHTML = comments
+    .map((comment, index) => {
+      return `<li class="comment  class-li" data-name="${comment.name}">
             <div class="comment-header">
               <div>${comment.name}</div>
               <div>${comment.date}</div>
@@ -33,42 +26,15 @@ export const renderComments = ({comments, listElement, initEventListeners,
               </div>
             </div>
           </li>`
-      })
-      .join("");
-  
-const appHtml = `
-<div class="container">
-<ul id="list" class="comments">${commentsHtml}</ul>
-<div class="login-page">
-  Чтобы добавить комментарий, <a href="LoginPage.html" class="login-page">авторизуйтесь</a>
-</div>
-<div id="loading-comment">
-  <p>Подождие, комментарии загружаются...</p>
-</div>
-<div id="comment-hover">
-  <p>Комментарий добавляется...</p>
-</div>
-<div class="add-form" id="add-form-disable">
-  <input id="name-input" type="text" class="add-form-name" placeholder="Введите ваше имя" value="" />
-  <textarea id="comment-text" type="textarea" class="add-form-text" placeholder="Введите ваш коментарий" rows="4"
-    value=""></textarea>
-  <div class="add-form-row">
-    <button id="add-button" class="add-form-button" data-index="${index}"> Написать</button>
-  </div>
-</div>
-</div>
-`;
+    })
+    .join("");
+
+ 
+  //initEventListeners(comments, listElement, buttonElement, listElement, nameInputElement, commentTextElement);
+  //changeButtonElementsFunc(comments, buttonElement, listElement, nameInputElement, commentTextElement);
+  //reviewButtonElements(comments, buttonElement, listElement, nameInputElement, commentTextElement);
+  //formatTime(currentDate);
+  initLikeButtonsListeners(comments);
 
 
-appElement.innerHTML = appHtml;
-  
-    initEventListeners(buttonElement, listElement, nameInputElement, commentTextElement);
-    initLikeButtonsListeners(buttonElement, listElement, nameInputElement, commentTextElement);
-    changeButtonElementsFunc(buttonElement, listElement, nameInputElement, commentTextElement);
-    reviewButtonElements(buttonElement, listElement, nameInputElement, commentTextElement);
-    //formatTime(currentDate);
-
-
-    
-    document.getElementById('add-form-disable').style.display = 'none';//скрывает форму добавления комме
-  };
+};

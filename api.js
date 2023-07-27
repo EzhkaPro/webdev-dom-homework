@@ -11,9 +11,9 @@ export const setToken = (newToken) => {
 export function getComments() {
     return fetch(commentsURL, {
         method: "GET",
-        //headers: {
-        //   Authorization:`Bearer ${token}`,
-        // },
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
     })
         .then((response) => {
             if (response.status === 401) {
@@ -36,13 +36,13 @@ export function postComments({ text, name }) {
         })
             .then((response) => {
                 if (response.status === 201) {
-                    document.getElementById('comment-hover').style.display = 'none';   
+                    document.getElementById('comment-hover').style.display = 'none';
                 }
-                 if (response.status === 400) {
+                if (response.status === 400) {
                     throw new Error("Количество символов в сообщении должно быть больше 3");
                 }
                 if (response.status === 500) {
-                    throw new Error("Кажется что-то пошло не так, попробуйте позже"); 
+                    throw new Error("Кажется что-то пошло не так, попробуйте позже");
                 } else {
                     return response.json();
                 };
@@ -50,6 +50,23 @@ export function postComments({ text, name }) {
     })
 }
 
+
+export function likeComment({ id }) {
+    return fetch(`${commentURL}/${id}/toggle-like`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    })
+    .then((response) => {
+        if (response.status === 200) {
+            return response.json();
+        }
+        else {
+            throw new Error('Неавторизованные пользователи не могут ставить лайки');
+        }
+    })
+}
 
 export function login({ login, password }) {
     return fetch(loginURL, {
