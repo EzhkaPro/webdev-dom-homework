@@ -10,8 +10,7 @@ export const renderRegistration = ({ listElement, comments }) => {
         <input type="text" id="name-input-registration" class="input" placeholder="Имя">
             <input type="text" id="login-input-registration" class="input" placeholder="Логин" >
                 <input type="text" id="password-input-registration" class="input" placeholder="Пароль" >
-                    <button class="add-form-button" id="login-button-registration">Зарегистрироваться</button>
-                    <a class="form-item" href="index.html" id="link-to-login">Перейти к комментариям</a>
+                    <button class="add-form-button" id="login-button-registration">Зарегистрироваться</button>                 
                 </div>
     `;
 

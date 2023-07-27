@@ -6,10 +6,10 @@ export const renderLogin = ({ listElement, comments }) => {
     for (const linkLoginPageElement of document.querySelectorAll('.link-login-page')) {
         linkLoginPageElement.addEventListener('click', () => {
             const loginHtml = `
-    <div class="form">
+    <div class="add-form">
       <h3 class="form-title">Форма входа</h3>
-      <input type="text" id="login-input" class="input" placeholder="Логин" />
-      <input type="text" id="password-input" class="input" placeholder="Пароль"
+      <input type="text" id="login-input" class="input" placeholder="Введите логин"  />
+      <input type="text" id="password-input" class="input" placeholder="Введите пароль">
       <button class="add-form-button" id="login-button" >Войти</button>
       <a class="form-register" href="#" id="register">Зарегистрироваться</a>
     </div>
