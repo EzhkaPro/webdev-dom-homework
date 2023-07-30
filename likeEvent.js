@@ -1,4 +1,6 @@
 import { renderComments } from "./renderComments.js";
+//import { mainGetComments } from "./main.js";
+//import { likeComment } from "./api.js";
 
 export const initLikeButtonsListeners = ( comments ) => {
   const likeButtonsElements = document.querySelectorAll('.like-button');
@@ -12,7 +14,8 @@ export const initLikeButtonsListeners = ( comments ) => {
         comments[index].isLiked = false;
         comments[index].likes -= 1;
       }
-      renderComments()
+      renderComments ({ comments });
     });
   })
 };
+

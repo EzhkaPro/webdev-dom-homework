@@ -16,12 +16,9 @@ export function getComments() {
         },
     })
         .then((response) => {
-            if (response.status === 401) {
-                throw new Error("Нет авторизации")
-            }
             return response.json();
         })
-}
+};
 
 export function postComments({ text, name }) {
     return fetch(commentsURL, {
@@ -32,23 +29,12 @@ export function postComments({ text, name }) {
         body: JSON.stringify({
             name: name,
             text: text,
+            likes: 0,
+            isLiked: false,
             forceError: true,
         })
-            .then((response) => {
-                if (response.status === 201) {
-                    document.getElementById('comment-hover').style.display = 'none';
-                }
-                if (response.status === 400) {
-                    throw new Error("Количество символов в сообщении должно быть больше 3");
-                }
-                if (response.status === 500) {
-                    throw new Error("Кажется что-то пошло не так, попробуйте позже");
-                } else {
-                    return response.json();
-                };
-            })
     })
-}
+};
 
 
 export function likeComment({ id }) {
@@ -58,25 +44,31 @@ export function likeComment({ id }) {
             Authorization: `Bearer ${token}`,
         },
     })
-    .then((response) => {
-        if (response.status === 200) {
-            return response.json();
-        }
-        else {
-            throw new Error('Неавторизованные пользователи не могут ставить лайки');
-        }
-    })
+        .then((response) => {
+            if (response.status === 200) {
+                return response.json();
+            }
+            else {
+                throw new Error('Авторизуйтесь чтобы ставить лайки');
+            }
+        })
 }
+
+
+
 
 export function login({ login, password }) {
     return fetch(loginURL, {
         method: "POST",
         body: JSON.stringify({
-            login,
-            password,
+            login: login,
+            password: password,
         }),
     })
         .then((response) => {
+            if (response.status === 401) {
+                throw new Error("Нет авторизации");
+            }
             if (response.status === 400) {
                 throw new Error('Введен неправильный логин или пароль');
             }
@@ -86,16 +78,22 @@ export function login({ login, password }) {
         })
 }
 
+
+
+
 export function registration({ name, login, password }) {
     return fetch(userURL, {
         method: "POST",
         body: JSON.stringify({
-            login,
-            name,
-            password,
+            name: name,
+            login: login,
+            password: password,
         }),
     })
         .then((response) => {
+            if (response.status === 201) {
+                alert('Вы успешно зарегистрировались')
+            }
             if (response.status === 400) {
                 throw new Error('Пользователь с таким логином уже сущетсвует');
             }

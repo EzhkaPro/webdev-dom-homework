@@ -4,8 +4,6 @@ import { formatTime } from "./formatTime.js";
 import { renderLogin } from "./LoginPage.js";
 import { initLikeButtonsListeners } from "./likeEvent.js";
 
-
-
 export const buttonElement = document.getElementById('add-button');
 export const listElement = document.getElementById('list');
 export const nameInputElement = document.getElementById('name-input');
@@ -14,7 +12,6 @@ export const formElement = document.getElementById('add-form-disable');
 export const commentHover = document.getElementById('comment-hover');
 export const loadingComment = document.getElementById('loading-comment');
 export const appElement = document.getElementById('app');
-
 
 loadingComment.style.display = 'none';
 commentHover.style.display = 'none';
@@ -31,31 +28,32 @@ renderLogin({ listElement, comments });
 const jsonComments = JSON.stringify(comments);
 const commentsFromJson = JSON.parse(jsonComments);
 
+
 function mainGetComments(comments) {
-  //document.getElementById('loading-comment').style.display = 'none';
-  getComments().then((responseData) => {
-    console.log(responseData)
+  getComments()
+    .then((responseData) => {
+      console.log(responseData)
+      const appComments = responseData.comments.map((comment) => {
+        return {
+          name: comment.author.name,
+          date: formatTime(new Date(comment.date)),
+          text: comment.text,
+          likes: comment.likes,
+          isLiked: false,
+          id: comment.id,
+        };
+      })
 
-    const appComments = responseData.comments.map((comment) => {
-      return {
-        name: comment.author.name,
-        date: formatTime(new Date(comment.date)),
-        text: comment.text,
-        likes: comment.likes,
-        isLiked: false,
-        id: comment.id,
-      };
+      comments = appComments;
+      renderComments({ comments });
+      loadingComment.style.display = 'none';
     })
-
-    comments = appComments;
-    renderComments({ comments });
-    
-    loadingComment.style.display = 'none';
-  })
-   // .then(() => {
-   //   buttonElement.disabled = false;
-  //    buttonElement.textContent = "Написать";
-  //  })
+    /*.then(() => {
+      if (response.status === 201) {
+        listElement.style.display = "flex";
+        formElement.style.display = "flex";
+      }
+    })*/
     .catch((error) => {
       if (error === 'Сервер сломался, попробуй позже') {
         alert('Сервер сломался, попробуй позже');
@@ -72,6 +70,7 @@ mainGetComments(comments);
 renderLogin({ listElement, comments });
 
 
+
 const sanitizeHtml = (htmlString) => {
   return htmlString
     .replaceAll("&", "&amp;")
@@ -84,45 +83,42 @@ getComments()
 
 
 function mainPostComments() {
-  document.getElementById('loading-comment').style.display = 'none';
-  document.getElementById('comment-hover').style.display = 'none';
-  document.getElementById('add-form-disable').style.display = 'none';
-
   postComments({
     name: sanitizeHtml(nameInputElement.value),
-    date: formatTime(new Date()),
-    likes: 0,
-    text: sanitizeHtml(commentTextElement.value),
-    isLiked: false,
-    forceError: true,
+    text: sanitizeHtml(commentTextElement.value)
   })
+    .then((response) => {
+      if (response.status === 400) {
+        throw new Error("Количество символов в сообщении должно быть больше 3");
+      }
+      else if (response.status === 500) {
+        throw new Error("Кажется что-то пошло не так, попробуйте позже");
+      } else {
+        return response.json();
+      };
+    })
     .then((responseData) => {
       console.log(responseData);
-      getComments();
-      renderComments();
+    })
+    .then(() => {
+      mainGetComments(comments);
+      renderComments({ comments });
+      commentHover.style.display = 'none';
+      formElement.style.display = 'flex';
+      listElement.style.display = "flex";
+      formElement.style.display = 'flex';
       nameInputElement.value = "";
       commentTextElement.value = "";
     })
-    .then(() => {
-      commentHover.style.display = 'none';
-    })
     .catch((error) => {
-      buttonElement.disabled = false;
-      buttonElement.textContent = "Написать";
-      document.getElementById('add-form-disable').style.display = 'none';
-      document.getElementById('loading-comment').style.display = 'none';
-      document.getElementById('comment-hover').style.display = 'none';
-
       alert(error.message)
       console.warn(error);
     });
 };
 
-
-
-buttonElement.addEventListener("click", (event) => {
-  mainPostComments()
-  renderComments()
+buttonElement.addEventListener("click", () => {
+  mainPostComments();
+  renderComments({ comments });
 });
 
 const disableButton = () => {
@@ -148,7 +144,7 @@ buttonElement.addEventListener("click", (event) => {
     commentTextElement.classList.add("error");
     return
   };
-  renderComments()
+  //renderComments(comments)
 });
 
 
@@ -202,4 +198,4 @@ const reviewButtonElements = () => {
 
 */
 
-initLikeButtonsListeners( {comments});
+initLikeButtonsListeners({ comments });
