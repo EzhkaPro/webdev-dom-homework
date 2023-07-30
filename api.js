@@ -78,9 +78,6 @@ export function login({ login, password }) {
         })
 }
 
-
-
-
 export function registration({ name, login, password }) {
     return fetch(userURL, {
         method: "POST",
