@@ -54,9 +54,6 @@ export function likeComment({ id }) {
         })
 }
 
-
-
-
 export function login({ login, password }) {
     return fetch(loginURL, {
         method: "POST",
