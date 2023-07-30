@@ -1,9 +1,9 @@
-import { listElement, buttonElement, nameInputElement, commentTextElement } from "../main.js";
-import {initLikeButtonsListeners } from "./likeEvent.js"
+import { listElement, buttonElement, nameInputElement, commentTextElement } from "./main.js";
+import { initLikeButtonsListeners } from "./likeEvent.js"
 
 
-export const renderComments = ({  comments }) => {
-    listElement.innerHTML = comments
+export const renderComments = ({ comments }) => {
+  listElement.innerHTML = comments
     .map((comment, index) => {
       return `<li class="comment  class-li" data-name="${comment.name}">
             <div class="comment-header">
@@ -29,12 +29,10 @@ export const renderComments = ({  comments }) => {
     })
     .join("");
 
- 
+
   //initEventListeners(comments, listElement, buttonElement, listElement, nameInputElement, commentTextElement);
   //changeButtonElementsFunc(comments, buttonElement, listElement, nameInputElement, commentTextElement);
   //reviewButtonElements(comments, buttonElement, listElement, nameInputElement, commentTextElement);
   //formatTime(currentDate);
   initLikeButtonsListeners(comments);
-
-
 };
