@@ -2,6 +2,7 @@ import { nameInputElement, formElement, listElement, appElement } from "./main.j
 import { login, setToken } from "./api.js";
 import { renderRegistration } from "./registrationPage.js";
 
+
 export const renderLogin = ({ listElement, comments }) => {
     for (const linkLoginPageElement of document.querySelectorAll('.link-login-page')) { //из HTML кнопка авторизоваться
         linkLoginPageElement.addEventListener('click', () => {
