@@ -3,7 +3,9 @@ import { initLikeButtonsListeners } from "./likeEvent.js"
 
 
 export const renderComments = ({ comments }) => {
+ 
   listElement.innerHTML = comments
+
     .map((comment, index) => {
       return `<li class="comment  class-li" data-name="${comment.name}">
             <div class="comment-header">

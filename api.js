@@ -1,6 +1,7 @@
 const commentsURL = 'https://wedev-api.sky.pro/api/v2/galina-lukianova/comments';
 const loginURL = "https://wedev-api.sky.pro/api/user/login";
 const userURL = "https://wedev-api.sky.pro/api/user";
+import _ from 'lodash';
 
 export let token;
 
@@ -27,8 +28,8 @@ export function postComments({ text, name }) {
             Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-            name: name,
-            text: text,
+            name: _.capitalize(name),
+            text: _.capitalize(text),
             likes: 0,
             isLiked: false,
             forceError: true,
@@ -79,7 +80,7 @@ export function registration({ name, login, password }) {
     return fetch(userURL, {
         method: "POST",
         body: JSON.stringify({
-            name: name,
+            name: _.capitalize(name),
             login: login,
             password: password,
         }),

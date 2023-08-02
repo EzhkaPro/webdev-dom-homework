@@ -1,8 +1,9 @@
 import { getComments, postComments } from "./api.js";
 import { renderComments } from "./renderComments.js";
-import { formatTime } from "./formatTime.js";
+import { formatDate } from "./lib/formatDate/formatDate.js";
 import { renderLogin } from "./LoginPage.js";
 import { initLikeButtonsListeners } from "./likeEvent.js";
+import { format } from "date-fns";
 
 export const buttonElement = document.getElementById('add-button');
 export const listElement = document.getElementById('list');
@@ -36,7 +37,8 @@ function mainGetComments(comments) {
       const appComments = responseData.comments.map((comment) => {
         return {
           name: comment.author.name,
-          date: formatTime(new Date(comment.date)),
+          date: format(new Date(comment.date), "yyyy-MM-dd hh.mm.ss"),
+          
           text: comment.text,
           likes: comment.likes,
           isLiked: false,
